@@ -1,3 +1,19 @@
+/* 
+# Author: Biju Nair
+# Github: https://github.com/bijugs
+#
+# License
+# =======
+#
+# [Apache 2.0 license](http://www.apache.org/licenses/LICENSE-2.0)
+#
+# Unless required by applicable law or agreed to in writing, software distributed
+# under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+# CONDITIONS OF ANY KIND, either expressed or implied. See the license for the specific
+# language governing permissions and limitations under the license.
+#
+# Copyright (c) 2015 The Authors, All Rights Reserved.
+*/
 package com.asquareb.kaaval;
 
 /**
@@ -24,7 +40,7 @@ public class PasswordRules {
 	 * Method to call to verify the password rules.
 	 * Accepts the password to be verified as a char array
 	 */
-	public static boolean verifyPassword(char[] str) throws KaavalException {
+	public static boolean verifyPassword(char[] str) {
 		/**
 		 * Variables to verify password rules
 		 */
@@ -51,19 +67,8 @@ public class PasswordRules {
 				&& vNonalnulen >= NONALNULEN && vCaplen >= CAPLEN && vSmalllen >= SMALLLEN)
 			return true;
 		else
-			throw new KaavalException(6,"Password selected doesn't satisfy requirements");
-	}
-	/**
-	 * Test code to verify the verifyPassword method
-	 */
-	public static void main(String args[]){
-		String password = "XY@*89abc";
-		try {
-			PasswordRules.verifyPassword(password.toCharArray());
-			System.out.println("Password is good");
-		}catch(KaavalException e){
-			e.PrintProtectException();
-		}
+			System.out.println("6: Entered phrase didn't meet standards");
+			return false;
 	}
 }
 

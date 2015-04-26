@@ -1,3 +1,20 @@
+/* 
+* Author: Biju Nair
+# Github: https://github.com/bijugs
+#
+# License
+# =======
+#
+# [Apache 2.0 license](http://www.apache.org/licenses/LICENSE-2.0)
+#
+# Unless required by applicable law or agreed to in writing, software distributed
+# under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+# CONDITIONS OF ANY KIND, either expressed or implied. See the license for the specific
+# language governing permissions and limitations under the license.
+#
+# Copyright (c) 2015 The Authors, All Rights Reserved.
+*/
+
 package com.asquareb.kaaval;
 
 /**
@@ -19,8 +36,8 @@ import javax.crypto.spec.PBEParameterSpec;
 import org.apache.commons.codec.binary.*;
 
 /**
- * Java class to create a key file during encryption. The key file is required to
- * decrypt the value in an encrypted form
+ * Java class to create a key file during encryption. The key file is required
+ * to decrypt the value in an encrypted form
  */
 class MachineKey implements Serializable {
 
@@ -29,7 +46,7 @@ class MachineKey implements Serializable {
 	protected SecretKey yek = null;
 
 	protected String api = null;
-	
+
 	protected String macad = null;
 
 	protected byte[] tlas = null;
@@ -40,9 +57,9 @@ class MachineKey implements Serializable {
 /**
  * Class to encrypt and decrypt strings. Uses PBE based crypto to do encrypt and
  * decrypt. This can be run as a command line utility and the methods can be
- * individually called from a JAVA program
- * Need to have an implementation of Base64 CODEC in the class path. For e.g the 
- * commons-codec-1.5.jar file from Apache.
+ * individually called from a JAVA program Need to have an implementation of
+ * Base64 CODEC in the class path. For e.g the commons-codec-1.5.jar file from
+ * Apache.
  */
 public class ProtectedConfigFile {
 
@@ -60,45 +77,51 @@ public class ProtectedConfigFile {
 	private static byte[] salt = new byte[8];
 
 	/**
-	 * Main method to execute as a command line utility. Provides the
-	 * option to encrypt a string, decrypt a encrypted string or exit from the
-	 * program
+	 * Main method to execute as a command line utility. Provides the option to
+	 * encrypt a string, decrypt a encrypted string or exit from the program
 	 */
-	public static void main(String[] args){
+	public static void main(String[] args) {
 		String originalPassword = null;
 		String encryptedPassword = null;
 		try {
-			final BufferedReader cin = new BufferedReader(new InputStreamReader(
-					System.in));
+			final BufferedReader cin = new BufferedReader(
+					new InputStreamReader(System.in));
 			System.out.print("Enter E - Encrypt,D - Decrypt,X - Exit :");
 			final String choice = cin.readLine();
 			final Random rand = new Random();
+			boolean phraseCorrect = false;
 			String app = null;
 			if (choice.equalsIgnoreCase("E")) {
 				System.out.print("Enter the string to encrypt :");
 				originalPassword = cin.readLine();
 				System.out.println("Choose a phrase of min 8 chars in length ");
 				System.out.println(" Also the password should include 2 Cap,");
-				System.out.println(" 2 small letters,2 numeric and 2 non alpha numeric chars");
-				System.out.print("Enter a password to encrypt :");
-				password = cin.readLine().toCharArray();
-				PasswordRules.verifyPassword(password);
+				System.out
+						.println(" 2 small letters,2 numeric and 2 non alpha numeric chars");
+				while (!phraseCorrect) {
+					System.out.print("Enter a phrase to encrypt :");
+					password = cin.readLine().toCharArray();
+					phraseCorrect = PasswordRules.verifyPassword(password);
+				}
 				System.out.print("Enter application code :");
 				app = cin.readLine();
 				app += (rand.nextInt(10000));
 				encryptedPassword = encrypt(originalPassword, app);
 				System.out.println("Encrypted password :" + encryptedPassword);
 				System.out.println("Key stored in :" + app);
-				System.out.println("*** Provide the encrypted string to app team");
-				System.out.println("*** Store the key file in a secure durectory");
-				System.out.println("*** Inform the key file name and location to app team");
+				System.out
+						.println("*** Provide the encrypted string to app team");
+				System.out
+						.println("*** Store the key file in a secure durectory");
+				System.out
+						.println("*** Inform the key file name and location to app team");
 			} else if (choice.equalsIgnoreCase("D")) {
 				System.out.print("Enter the string to Decrypt :");
 				encryptedPassword = cin.readLine();
 				System.out.print("Enter the name of key file :");
 				app = cin.readLine();
 				final String decryptedPassword = decrypt(encryptedPassword, app);
-				System.out.print("Decrypted password :" + decryptedPassword);
+				System.out.print("Decrypted string :" + decryptedPassword);
 			}
 			return;
 		} catch (KaavalException e) {
@@ -146,7 +169,8 @@ public class ProtectedConfigFile {
 					mKey.eti));
 			return base64Encode(pbeCipher.doFinal(property.getBytes()));
 		} catch (IOException e) {
-			throw new KaavalException(1, "Error in key file during encryption", e);
+			throw new KaavalException(1, "Error in key file during encryption",
+					e);
 		} catch (Exception e) {
 			throw new KaavalException(2, "Errors during encryption", e);
 		} finally {
@@ -154,9 +178,10 @@ public class ProtectedConfigFile {
 				os.close();
 		}
 	}
+
 	/**
-	 * Method to encode bytes to strings.
-	 * Uses Apache implementation of Base 64 CODEC
+	 * Method to encode bytes to strings. Uses Apache implementation of Base 64
+	 * CODEC
 	 */
 	private static String base64Encode(byte[] bytes) {
 		return Base64.encodeBase64String(bytes);
@@ -185,14 +210,15 @@ public class ProtectedConfigFile {
 			eti = mKey.eti;
 			String ipa = ip.getHostAddress();
 			if (!ipa.equals(mKey.api) || !new String(macId).equals(mKey.macad))
-				throw new KaavalException(5,"Key file is not for this machine");
+				throw new KaavalException(5, "Key file is not for this machine");
 			is.close();
 			pbeCipher = Cipher.getInstance("PBEWithMD5AndDES");
-			pbeCipher.init(Cipher.DECRYPT_MODE, key,
-					new PBEParameterSpec(salt, eti));
+			pbeCipher.init(Cipher.DECRYPT_MODE, key, new PBEParameterSpec(salt,
+					eti));
 			return new String(pbeCipher.doFinal(base64Decode(property)));
 		} catch (IOException e) {
-			throw new KaavalException(3, "Error in reading key file during decryption", e);
+			throw new KaavalException(3,
+					"Error in reading key file during decryption", e);
 		} catch (KaavalException e) {
 			throw e;
 		} catch (Exception e) {
@@ -202,10 +228,10 @@ public class ProtectedConfigFile {
 				is.close();
 		}
 	}
-	
+
 	/**
-	 * Method to decode string to bytes.
-	 * Uses Apache implementation of Base 64 CODEC
+	 * Method to decode string to bytes. Uses Apache implementation of Base 64
+	 * CODEC
 	 */
 	private static byte[] base64Decode(String property) throws IOException {
 		return new Base64().decode(property);
